@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import telegram
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -58,14 +57,27 @@ def movie_lookup(movie):
     movie_id, movie_title, movie_year, movie_rating = (
         movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
 
-    movie_rating = str(movie_rating).replace('.', '\.')
+    if movie_id == "404":
+        tg_reply = ("I'm having trouble finding that movie\." +
+                    "Check your spelling and try again\.")
+        return tg_reply
+
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
+    if sa_response == "404":
+        tg_reply = ("I'm having trouble finding that movie\." +
+                    "Check your spelling and try again\.")
+        return tg_reply
+
+    movie_title = movie_check.char_cleanup(movie_title)
+    movie_year = movie_check.char_cleanup(movie_year)
+    movie_rating = movie_check.char_cleanup(movie_rating)
+
     tg_reply = (f"{movie_title} \({movie_year}\)\nRating: {movie_rating}" +
                 f"\n[TMDB]({tmdb_page}{movie_id})")
     logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services:
-        tg_reply = tg_reply + "\n\nStreaming not available :\("
+        tg_reply = tg_reply + "\n\nStreaming not available :("
     else:
         for s in services:
             leaving_epoch = sa_response["streamingInfo"][s]["us"]["leaving"]
@@ -77,16 +89,18 @@ def movie_lookup(movie):
             tg_reply = tg_reply + f"\n\nAvailable on *{s_pretty}*"
 
             if leaving_epoch != 0:
-                tg_reply = tg_reply + f"Will be leaving on {leaving_date}"
+                tg_reply = tg_reply + f"\nWill be leaving on {leaving_date}"
 
             tg_reply = tg_reply + f"\n[Watch here]({link})"
+
     return tg_reply
 
 
 def input_movie(update: Update, context: CallbackContext):
     movie = update.message.text
     movie_info = movie_lookup(movie)
-    context.bot.send_message(chat_id=update.effective_chat.id, text=movie_info, parse_mode=telegram.ParseMode.MARKDOWN_V2)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def unknown(update: Update, context: CallbackContext):

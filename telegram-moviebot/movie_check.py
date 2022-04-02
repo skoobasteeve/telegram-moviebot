@@ -16,9 +16,7 @@ def tmdb_lookup(tmdb_url, tmdb_headers, movie):
                                headers=tmdb_headers).json()
 
     if not tmdb_search["results"]:
-        print("I'm having trouble finding that movie. " +
-              "Check your spelling and try again.")
-        exit()
+        return "404", "404", "404", "404"
 
     movie_id = tmdb_search['results'][0]['id']
     movie_title = tmdb_search['results'][0]['title']
@@ -47,12 +45,10 @@ def sa_lookup(sa_url, sa_headers, movie_id):
                                   params=sa_params)
 
     if sa_request.status_code == 404:
-        print("I'm having trouble finding that movie on streaming. " +
-              "Check your spelling and try again.")
-        exit()
-
-    sa_response = sa_request.json()
-    services = sa_response["streamingInfo"]
+        sa_response = "404"
+    else:
+        sa_response = sa_request.json()
+        services = sa_response["streamingInfo"]
 
     return sa_response, services
 
@@ -69,9 +65,9 @@ def services_speller(service):
     elif service == "disney":
         service_proper = "Disney+"
     elif service == "apple":
-        service_proper = "Apple TV+"
+        service_proper = "Apple TV\+"
     elif service == "paramount":
-        service_proper = "Paramount+"
+        service_proper = "Paramount\+"
     elif service == "starz":
         service_proper = "STARZ"
     elif service == "showtime":
@@ -81,3 +77,13 @@ def services_speller(service):
     else:
         return service
     return service_proper
+
+
+def char_cleanup(variable):
+    variable = str(variable).replace('-', '\-')
+    variable = str(variable).replace('(', '\(')
+    variable = str(variable).replace(')', '\)')
+    variable = str(variable).replace('+', '\+')
+    variable = str(variable).replace('.', '\.')
+
+    return variable
