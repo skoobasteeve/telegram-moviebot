@@ -60,9 +60,9 @@ def movie_lookup(movie):
 
     movie_rating = str(movie_rating).replace('.', '\.')
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
-    tg_reply = (f"{movie_title} \({movie_year}\)\n[TMDB]({tmdb_page}{movie_id})" +
-                f"\nRating: {movie_rating}")
-    logger.info(f'Returning movie: "{movie_title}: \({movie_year}\)"')
+    tg_reply = (f"{movie_title} \({movie_year}\)\nRating: {movie_rating}" +
+                f"\n[TMDB]({tmdb_page}{movie_id})")
+    logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services:
         tg_reply = tg_reply + "\n\nStreaming not available :\("
