@@ -4,7 +4,6 @@ import requests
 from datetime import datetime
 
 
-
 def tmdb_lookup(tmdb_url, tmdb_headers, movie):
     tmdb_params = {
         "language": "en-US",
@@ -80,5 +79,3 @@ def services_speller(service):
     else:
         return service
     return service_proper
-
-

@@ -1,17 +1,23 @@
 #!/usr/bin/python3
 
-from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    CallbackContext,
+    MessageHandler,
+    Filters)
 import logging
 from telegram import Update
 import os
 from datetime import datetime
 import movie_check
 
+
 tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
 sa_api_token = os.environ.get("SA_API_TOKEN")
 bot_token = os.environ.get("TG_BOT_TOKEN")
 
-filter_user = ""
+filter_user = "@skoobasteeve"
 
 tmdb_url = "https://api.themoviedb.org/3"
 tmdb_headers = {
@@ -29,23 +35,31 @@ sa_headers = {
 updater = Updater(token=bot_token, use_context=True)
 dispatcher = updater.dispatcher
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 
 def start(update: Update, context: CallbackContext):
-    movie_handler = MessageHandler(Filters.text & (~Filters.command), input_movie)
+    movie_handler = MessageHandler(Filters.text & (~Filters.command),
+                                   input_movie)
     dispatcher.add_handler(movie_handler)
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a movie streaming bot! Type in a movie and tell you where to stream it.")
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="I'm a movie streaming bot! Type in a " +
+                             "movie and I'll tell you where to stream it.")
 
 
 def movie_lookup(movie):
     logger.info(f'Looking up movie: "{movie}"')
-    movie_id, movie_title, movie_year, movie_rating = movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie)
+    tmdb_page = "https://themoviedb.org/movie/"
+    movie_id, movie_title, movie_year, movie_rating = (
+        movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
+
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
-    tg_reply = f"{movie_title} ({movie_year})\nhttps://themoviedb.org/movie/{movie_id}\nRating: {movie_rating}"
+    tg_reply = (f"{movie_title} ({movie_year})\n{tmdb_page}{movie_id}" +
+                f"\nRating: {movie_rating}")
     logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services:
@@ -62,7 +76,7 @@ def movie_lookup(movie):
 
             if leaving_epoch != 0:
                 tg_reply = tg_reply + f"Will be leaving on {leaving_date}"
-            
+
             tg_reply = tg_reply + f"\nWatch here: {link}"
     return tg_reply
 
@@ -74,12 +88,14 @@ def input_movie(update: Update, context: CallbackContext):
 
 
 def unknown(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Sorry, I didn't understand that command.")
 
 
 def main():
 
-    start_handler = CommandHandler('start', start, Filters.user(username=filter_user))
+    start_handler = CommandHandler('start', start,
+                                   Filters.user(username=filter_user))
     dispatcher.add_handler(start_handler)
 
     unknown_handler = MessageHandler(Filters.command, unknown)
