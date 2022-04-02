@@ -76,6 +76,8 @@ def services_speller(service):
         service_proper = "STARZ"
     elif service == "showtime":
         service_proper = "Showtime"
+    elif service == "peacock":
+        service_proper = "Peacock"
     else:
         return service
     return service_proper
