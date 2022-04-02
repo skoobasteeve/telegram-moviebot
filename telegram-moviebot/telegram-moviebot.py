@@ -11,6 +11,7 @@ from telegram import Update, ParseMode
 import os
 from datetime import datetime
 import movie_check
+import difflib
 
 
 tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
@@ -68,6 +69,11 @@ def movie_lookup(movie):
                     "Check your spelling and try again\.")
         return tg_reply
 
+    similarity = difflib.SequenceMatcher(None, movie, movie_title).ratio()
+    sim_percent = "{0:.0f}%".format(similarity * 100)
+
+    logger.info(f'Result was a {sim_percent} match.')
+
     movie_title = movie_check.char_cleanup(movie_title)
     movie_year = movie_check.char_cleanup(movie_year)
     movie_rating = movie_check.char_cleanup(movie_rating)
@@ -93,14 +99,18 @@ def movie_lookup(movie):
 
             tg_reply = tg_reply + f"\n[Watch here]({link})"
 
-    return tg_reply
+    return tg_reply, similarity
 
 
 def input_movie(update: Update, context: CallbackContext):
-    movie = update.message.text
-    movie_info = movie_lookup(movie)
+    movie = update.message.text.title()
+    movie_info, similarity = movie_lookup(movie)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
+    if similarity < .80:
+        followup_msg = "Not the movie you're looking for? Sorry, I have to implement a 'year' function\."
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text=followup_msg, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def unknown(update: Update, context: CallbackContext):
