@@ -12,7 +12,6 @@ import os
 from datetime import datetime
 import movie_check
 import difflib
-import re
 
 
 tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
@@ -111,7 +110,8 @@ def input_movie(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
     if similarity < .80 and similarity != 0:
-        followup_msg = "Not the movie you're looking for? Sorry, I have to implement a 'year' function\."
+        followup_msg = ("Not the movie you're looking for? " + 
+                        "Sorry, I have to implement a 'year' function\.")
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text=followup_msg, parse_mode=ParseMode.MARKDOWN_V2)
 
