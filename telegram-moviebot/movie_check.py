@@ -66,7 +66,7 @@ def services_speller(service):
     elif service == "netflix":
         service_proper = "Netflix"
     elif service == "disney":
-        service_proper = "Disney+"
+        service_proper = "Disney\+"
     elif service == "apple":
         service_proper = "Apple TV\+"
     elif service == "paramount":

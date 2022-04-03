@@ -18,7 +18,7 @@ tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
 sa_api_token = os.environ.get("SA_API_TOKEN")
 bot_token = os.environ.get("TG_BOT_TOKEN")
 
-filter_user = "@skoobasteeve"
+filter_user = ""
 
 tmdb_url = "https://api.themoviedb.org/3"
 tmdb_headers = {
@@ -123,8 +123,12 @@ def unknown(update: Update, context: CallbackContext):
 
 def main():
 
-    start_handler = CommandHandler('start', start,
-                                   Filters.user(username=filter_user))
+    if filter_user:
+        start_handler = CommandHandler('start', start,
+                                       Filters.user(username=filter_user))
+    else:
+        start_handler = CommandHandler('start', start)
+
     dispatcher.add_handler(start_handler)
 
     unknown_handler = MessageHandler(Filters.command, unknown)
