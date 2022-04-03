@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 
 import requests
+import re
 from datetime import datetime
 
 
 def tmdb_lookup(tmdb_url, tmdb_headers, movie):
+
+    movie = re.sub('[^a-zA-Z.\d\s]', '', movie)
     tmdb_params = {
         "language": "en-US",
         "query": movie,

@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 import movie_check
 import difflib
+import re
 
 
 tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
@@ -59,15 +60,17 @@ def movie_lookup(movie):
         movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
 
     if movie_id == "404":
-        tg_reply = ("I'm having trouble finding that movie\." +
+        tg_reply = ("I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
-        return tg_reply
+        similarity = 0
+        return tg_reply, similarity
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
     if sa_response == "404":
-        tg_reply = ("I'm having trouble finding that movie\." +
+        tg_reply = ("I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
-        return tg_reply
+        similarity = 0
+        return tg_reply, similarity
 
     similarity = difflib.SequenceMatcher(None, movie, movie_title).ratio()
     sim_percent = "{0:.0f}%".format(similarity * 100)
@@ -83,7 +86,7 @@ def movie_lookup(movie):
     logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services:
-        tg_reply = tg_reply + "\n\nStreaming not available :("
+        tg_reply = tg_reply + "\n\nStreaming not available :\("
     else:
         for s in services:
             leaving_epoch = sa_response["streamingInfo"][s]["us"]["leaving"]
@@ -107,7 +110,7 @@ def input_movie(update: Update, context: CallbackContext):
     movie_info, similarity = movie_lookup(movie)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
-    if similarity < .80:
+    if similarity < .80 and similarity != 0:
         followup_msg = "Not the movie you're looking for? Sorry, I have to implement a 'year' function\."
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text=followup_msg, parse_mode=ParseMode.MARKDOWN_V2)
