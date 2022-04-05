@@ -14,5 +14,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      env:
+        github_pat: ${{ secrets.CONTAINER_PAT }}
+
+    
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag telegram-moviebot:$(date +%s)
+    
+    - name: Authenticate to the container registry
+      run: echo $github_pat | docker login ghcr.io -u skoobasteeve --password-stdin
+    
+    - name: Push the image to container registry
+      run: docker push ghcr.io/skoobasteeve/telegram-moviebot:latest
