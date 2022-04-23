@@ -135,6 +135,18 @@ def unknown(update: Update, context: CallbackContext):
 
 def main():
 
+    if not tmdb_api_token:
+        print("ERROR: TMDB API token not provided. Exiting...")
+        exit()
+    
+    if not sa_api_token:
+        print("ERROR: Streaming Availability API token not provided. Exiting...")
+        exit()
+    
+    if not bot_token:
+        print("ERROR: Telegram bot token not provided. Exiting...")
+        exit()
+
     if filter_user:
         start_handler = CommandHandler('start', start,
                                        Filters.user(username=filter_user))
