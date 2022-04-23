@@ -3,7 +3,7 @@
 
 Built using the wonderful [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library and the below APIs.
 
-![tg_search1](images/tg_search1.gif) | width=250
+![tg_search1](images/tg_search1.gif)
 
 ## Requirements
 - [Streaming Availability API token](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability)
@@ -71,4 +71,6 @@ Once your bot is set up, simply open a new conversation with the bot and type /s
 
 Next, type the name of the movie you're looking for.  
 
-Most of the time, you'll find your movie on the first try. However, you can further narrow your search by specifying the `-year` flag followed the the release year.
+Most of the time, you'll find your movie on the first try. However, you can further narrow your search by specifying the `-year` flag followed the the release year.  
+
+![tg_search2](images/tg_search2.gif)
