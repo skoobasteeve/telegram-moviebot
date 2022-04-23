@@ -19,7 +19,12 @@ def tmdb_lookup(tmdb_url, tmdb_headers, movie, year=None):
         tmdb_params["primary_release_year"] = year
 
     tmdb_search = requests.get(f"{tmdb_url}/search/movie", params=tmdb_params,
-                               headers=tmdb_headers).json()
+                               headers=tmdb_headers)
+
+    if tmdb_search.status_code == 401:
+        return "401", "401", "401", "401"
+    
+    tmdb_search = tmdb_search.json()
 
     if not tmdb_search["results"]:
         return "404", "404", "404", "404"
@@ -50,7 +55,9 @@ def sa_lookup(sa_url, sa_headers, movie_id):
     sa_request = requests.request("GET", sa_url, headers=sa_headers,
                                   params=sa_params)
 
-    if sa_request.status_code == 404:
+    if sa_request.status_code == 401:
+        sa_response = "401"
+    elif sa_request.status_code == 404:
         sa_response = "404"
     else:
         sa_response = sa_request.json()
