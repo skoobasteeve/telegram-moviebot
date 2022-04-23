@@ -1,6 +1,6 @@
 FROM python:3-alpine
 
-LABEL com.telegram-moviebot.version="0.1"
+LABEL com.telegram-moviebot.version="main"
 
 WORKDIR /
 
