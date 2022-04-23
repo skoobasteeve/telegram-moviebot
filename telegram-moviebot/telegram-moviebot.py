@@ -17,6 +17,10 @@ tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
 sa_api_token = os.environ.get("SA_API_TOKEN")
 bot_token = os.environ.get("TG_BOT_TOKEN")
 
+print(tmdb_api_token)
+print(sa_api_token)
+print(bot_token)
+
 filter_user = os.environ.get("TG_BOT_USER")
 
 tmdb_url = "https://api.themoviedb.org/3"
