@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 
 
-def tmdb_lookup(tmdb_url, tmdb_headers, movie):
+def tmdb_lookup(tmdb_url, tmdb_headers, movie, year=None):
 
     movie = re.sub('[^a-zA-Z.\d\s]', '', movie)
     tmdb_params = {
@@ -14,6 +14,9 @@ def tmdb_lookup(tmdb_url, tmdb_headers, movie):
         "page": 1,
         "include_adult": False
     }
+
+    if year:
+        tmdb_params["primary_release_year"] = year
 
     tmdb_search = requests.get(f"{tmdb_url}/search/movie", params=tmdb_params,
                                headers=tmdb_headers).json()
