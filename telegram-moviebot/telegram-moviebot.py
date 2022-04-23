@@ -53,14 +53,24 @@ def start(update: Update, context: CallbackContext):
 
 
 def movie_lookup(movie):
-    logger.info(f'Looking up movie: "{movie}"')
+
+    if "-Year" in movie:
+        year = movie.split("-Year")[1].strip()
+        movie = movie.split("-Year")[0].strip()
+        logger.info(f'Looking up movie: "{movie}" ({year})')
+        movie_id, movie_title, movie_year, movie_rating = (
+        movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie, year))
+    else:
+        logger.info(f'Looking up movie: "{movie}"')
+        movie_id, movie_title, movie_year, movie_rating = (
+            movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
+
     tmdb_page = "https://themoviedb.org/movie/"
-    movie_id, movie_title, movie_year, movie_rating = (
-        movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
 
     if movie_id == "404":
         tg_reply = ("I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
+        logger.info('Movie not found in TMDB.')
         similarity = 0
         return tg_reply, similarity
 
@@ -68,6 +78,7 @@ def movie_lookup(movie):
     if sa_response == "404":
         tg_reply = ("I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
+        logger.info('Movie not found by the Streaming Availability API.')
         similarity = 0
         return tg_reply, similarity
 
@@ -110,8 +121,9 @@ def input_movie(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
     if similarity < .80 and similarity != 0:
+        logger.info("Result accuracy was below the threshold. Sending follow-up message.")
         followup_msg = ("Not the movie you're looking for? " + 
-                        "Sorry, I have to implement a 'year' function\.")
+                        "Try adding '\-year' followed by the release year after the title\.")
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text=followup_msg, parse_mode=ParseMode.MARKDOWN_V2)
 
