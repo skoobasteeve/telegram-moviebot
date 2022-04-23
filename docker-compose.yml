@@ -2,10 +2,11 @@
 version: 3
 services:
   telegram-moviebot:
+    container_name: telegram-moviebot
     image: skoobasteeve/telegram-moviebot:main
     environment:
-      - TMDB_API_TOKEN=""
-      - SA_API_TOKEN=""
-      - TG_BOT_TOKEN=""
-      - TG_BOT_USER="" # (optional) Limits access to the bot to a single Telegram user
+      - TMDB_API_TOKEN=
+      - SA_API_TOKEN=
+      - TG_BOT_TOKEN=
+      - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
   restart: always
