@@ -13,7 +13,6 @@ from datetime import datetime
 import movie_check
 import difflib
 
-
 tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
 sa_api_token = os.environ.get("SA_API_TOKEN")
 bot_token = os.environ.get("TG_BOT_TOKEN")
@@ -41,6 +40,11 @@ logging.basicConfig(
     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
+def shutdown():
+    updater.stop()
+    updater.is_idle = False
 
 
 def start(update: Update, context: CallbackContext):
@@ -72,7 +76,16 @@ def movie_lookup(movie):
                     "Check your spelling and try again\.")
         logger.info('Movie not found in TMDB.')
         similarity = 0
-        return tg_reply, similarity
+        error_response = False
+        return tg_reply, similarity, error_response
+    
+    if movie_id == "401":
+        tg_reply = ("Invalid TMDB API token\. " +
+                    "Bot shutting down until restarted\.\.\.")
+        logger.info('Invalid TMDB API token. Exiting...')
+        similarity = 0
+        error_response = True
+        return tg_reply, similarity, error_response
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
     if sa_response == "404":
@@ -80,7 +93,16 @@ def movie_lookup(movie):
                     "Check your spelling and try again\.")
         logger.info('Movie not found by the Streaming Availability API.')
         similarity = 0
-        return tg_reply, similarity
+        error_response = False
+        return tg_reply, similarity, error_response
+    
+    if sa_response == "401":
+        tg_reply = ("Invalid Streaming Availability API token\. " +
+                    "Bot shutting down until restarted\.\.\.")
+        logger.info('Invalid Streaming Availability API token. Exiting...')
+        similarity = 0
+        error_response = True
+        return tg_reply, similarity, error_response
 
     similarity = difflib.SequenceMatcher(None, movie, movie_title).ratio()
     sim_percent = "{0:.0f}%".format(similarity * 100)
@@ -112,14 +134,17 @@ def movie_lookup(movie):
 
             tg_reply = tg_reply + f"\n[Watch here]({link})"
 
-    return tg_reply, similarity
+    error_response = False
+    return tg_reply, similarity, error_response
 
 
 def input_movie(update: Update, context: CallbackContext):
     movie = update.message.text.title()
-    movie_info, similarity = movie_lookup(movie)
+    movie_info, similarity, error_response = movie_lookup(movie)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
+    if error_response:
+        shutdown()
     if similarity < .80 and similarity != 0:
         logger.info("Result accuracy was below the threshold. Sending follow-up message.")
         followup_msg = ("Not the movie you're looking for? " + 
