@@ -89,12 +89,7 @@ def movie_lookup(movie):
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
     if sa_response == "404":
-        tg_reply = ("I'm having trouble finding that movie\. " +
-                    "Check your spelling and try again\.")
         logger.info('Movie not found by the Streaming Availability API.')
-        similarity = 0
-        error_response = False
-        return tg_reply, similarity, error_response
     
     if sa_response == "401":
         tg_reply = ("Invalid Streaming Availability API token\. " +
@@ -117,7 +112,7 @@ def movie_lookup(movie):
                 f"\n[TMDB]({tmdb_page}{movie_id})")
     logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
 
-    if not services:
+    if not services or sa_response == "404":
         tg_reply = tg_reply + "\n\nStreaming not available :\("
     else:
         for s in services:
