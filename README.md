@@ -79,3 +79,6 @@ Next, type the name of the movie you're looking for.
 Most of the time, you'll find your movie on the first try. However, you can further narrow your search by specifying the `-year` flag followed the the release year.  
 
 ![tg_search2](images/tg_search2.gif)
+
+## Contributing
+Feel free to submit an issue or pull request any time!
