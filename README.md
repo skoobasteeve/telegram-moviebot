@@ -18,6 +18,9 @@ Regardless of how you run it, the program expects the above API tokens to be ava
 - **TMDB_API_TOKEN**
 - **TG_BOT_TOKEN**
 
+Optional environment variables:
+- **STREAMING_COUNTRY** (default "us") - Choose any ISO 3166 country code supported by the [Sreaming Availability API](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/)
+
 ### Docker
 One-liner:  
 ```
@@ -39,6 +42,7 @@ services:
       - TMDB_API_TOKEN=${TMDB_API_TOKEN} # Required
       - SA_API_TOKEN=${SA_API_TOKEN} # Required
       - TG_BOT_TOKEN=${TG_BOT_TOKEN} # Required
+      - STREAMING_COUNTRY= # (optional) Default "us"
       - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
   restart: always
 ```

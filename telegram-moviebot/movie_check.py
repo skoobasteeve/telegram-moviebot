@@ -45,9 +45,9 @@ def tmdb_lookup(tmdb_url, tmdb_headers, movie, year=None):
     return movie_id, movie_title, movie_year, movie_rating
 
 
-def sa_lookup(sa_url, sa_headers, movie_id):
+def sa_lookup(sa_url, sa_headers, movie_id, country):
     sa_params = {
-        "country": "us",
+        "country": country,
         "tmdb_id": f"movie/{movie_id}",
         "output_language": "en"
         }
