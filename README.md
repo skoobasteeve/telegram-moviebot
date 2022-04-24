@@ -23,7 +23,7 @@ Optional environment variables:
 
 ### Docker
 One-liner:  
-```
+``` sh
 docker run \ 
 --env TMDB_API_TOKEN=$TMDB_API_TOKEN
 --env SA_API_TOKEN=$SA_API_TOKEN
@@ -31,7 +31,7 @@ docker run \
 skoobasteeve/telegram-moviebot:main
 ```
 docker-compose:
-```
+``` yaml
 ---
 version: 3
 services:
@@ -46,24 +46,24 @@ services:
       - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
   restart: always
 ```
-```
+``` sh
 docker-compose up -d
 ```
 
 ### Run from source
 Clone the repo
-```
+``` sh
 git clone https://github.com/skoobasteeve/telegram-moviebot.git
 ```
 Install the dependencies
-```
+``` sh
 cd telegram-moviebot
 ```
-```
+``` sh
 pip install -r requirements.txt
 ```
 Run the bot
-```
+```sh
 python /telegram-moviebot/telegram-moviebot.py
 2022-04-23 16:08:37,698 - apscheduler.scheduler - INFO - Scheduler started
 2022-04-23 20:20:15,858 - __main__ - INFO - Looking up movie: "Star Wars"
