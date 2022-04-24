@@ -57,8 +57,10 @@ def sa_lookup(sa_url, sa_headers, movie_id):
 
     if sa_request.status_code == 401:
         sa_response = "401"
+        services = "404"
     elif sa_request.status_code == 404:
         sa_response = "404"
+        services = "404"
     else:
         sa_response = sa_request.json()
         services = sa_response["streamingInfo"]
