@@ -3,7 +3,7 @@
 
 ![tg_search1](images/tg_search1.gif)
 
-Built using the wonderful [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library and the [TMDB](https://developers.themoviedb.org/3/getting-started/introduction) and [Streaming Availability](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/details) APIs.
+Built using the wonderful [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library and the [TMDB](https://developers.themoviedb.org/3/getting-started/introduction) and [Streaming Availability](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/details) APIs. It's not a very talkative bot, but it does one task and it does it well.
 
 ## Requirements
 - [Streaming Availability API token](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability)
