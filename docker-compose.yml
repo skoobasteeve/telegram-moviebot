@@ -9,4 +9,5 @@ services:
       - SA_API_TOKEN=
       - TG_BOT_TOKEN=
       - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
+      - STREAMING_COUNTRY= # (optional) Default "us"
   restart: always
