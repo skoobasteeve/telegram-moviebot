@@ -17,6 +17,7 @@ tmdb_api_token = os.environ.get("TMDB_API_TOKEN")
 sa_api_token = os.environ.get("SA_API_TOKEN")
 bot_token = os.environ.get("TG_BOT_TOKEN")
 
+country = os.environ.get("STREAMING_COUNTRY") or "us"
 filter_user = os.environ.get("TG_BOT_USER")
 
 tmdb_url = "https://api.themoviedb.org/3"
@@ -87,7 +88,7 @@ def movie_lookup(movie):
         error_response = True
         return tg_reply, similarity, error_response
 
-    sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id)
+    sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id, country)
     if sa_response == "404":
         logger.info('Movie not found by the Streaming Availability API.')
     
@@ -166,6 +167,7 @@ def main():
     if not bot_token:
         print("ERROR: Telegram bot token not provided. Exiting...")
         exit()
+
 
     if filter_user:
         start_handler = CommandHandler('start', start,
