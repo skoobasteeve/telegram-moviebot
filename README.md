@@ -9,6 +9,7 @@ Built using the wonderful [python-telegram-bot](https://github.com/python-telegr
 - [Streaming Availability API token](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability)
 - [TMDB API token](https://developers.themoviedb.org/3/getting-started/introduction)
 - [Telegram Bot Token](https://core.telegram.org/bots)
+- Computer/VPS with an internet connection. No open ports required :)
   
 ## Getting Started
 
