@@ -1,9 +1,9 @@
 # Telegram Moviebot
 ### Chat-bot that tells you where to stream a movie.
 
-Built using the wonderful [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library and the below APIs.
-
 ![tg_search1](images/tg_search1.gif)
+
+Built using the wonderful [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library and the [TMDB](https://developers.themoviedb.org/3/getting-started/introduction) and [Streaming Availability](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/details) APIs.
 
 ## Requirements
 - [Streaming Availability API token](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability)
@@ -13,9 +13,9 @@ Built using the wonderful [python-telegram-bot](https://github.com/python-telegr
 ## Getting Started
 
 Regardless of how you run it, the program expects the above API tokens to be available as the below environment variables:  
-- $SA_API_TOKEN
-- $TMDB_API_TOKEN
-- $TG_BOT_TOKEN
+- **SA_API_TOKEN**
+- **TMDB_API_TOKEN**
+- **TG_BOT_TOKEN**
 
 ### Docker
 One-liner:  
