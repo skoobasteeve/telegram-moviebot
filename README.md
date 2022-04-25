@@ -1,5 +1,5 @@
 # Telegram Moviebot
-### Chat-bot that tells you where to stream a movie.
+### Telegram chat bot that tells you where to stream a movie.
 
 ![tg_search1](images/tg_search1.gif)
 
