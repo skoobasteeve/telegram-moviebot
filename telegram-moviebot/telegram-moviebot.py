@@ -19,6 +19,7 @@ bot_token = os.environ.get("TG_BOT_TOKEN")
 
 country = os.environ.get("STREAMING_COUNTRY") or "us"
 filter_user = os.environ.get("TG_BOT_USER")
+logging_debug = os.environ.get("TG_DEBUG")
 
 tmdb_url = "https://api.themoviedb.org/3"
 tmdb_headers = {
@@ -33,12 +34,19 @@ sa_headers = {
     'x-rapidapi-key': sa_api_token
     }
 
+
 updater = Updater(token=bot_token, use_context=True)
 dispatcher = updater.dispatcher
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+
+if logging_debug:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG)
+else:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +127,7 @@ def movie_lookup(movie, user_firstname):
 
     if not services or sa_response == "404":
         tg_reply = tg_reply + "\n\nStreaming not available :\("
+        logger.info(f'{user_firstname}: No streaming available for "{movie_title}: ({movie_year})"')
     else:
         for s in services:
             leaving_epoch = sa_response["streamingInfo"][s]["us"]["leaving"]
