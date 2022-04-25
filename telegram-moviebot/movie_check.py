@@ -100,5 +100,6 @@ def char_cleanup(variable):
     variable = str(variable).replace(')', '\)')
     variable = str(variable).replace('+', '\+')
     variable = str(variable).replace('.', '\.')
+    variable = str(variable).replace('!', '\!')
 
     return variable

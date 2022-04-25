@@ -19,6 +19,7 @@ bot_token = os.environ.get("TG_BOT_TOKEN")
 
 country = os.environ.get("STREAMING_COUNTRY") or "us"
 filter_user = os.environ.get("TG_BOT_USER")
+logging_debug = os.environ.get("TG_DEBUG")
 
 tmdb_url = "https://api.themoviedb.org/3"
 tmdb_headers = {
@@ -33,12 +34,19 @@ sa_headers = {
     'x-rapidapi-key': sa_api_token
     }
 
+
 updater = Updater(token=bot_token, use_context=True)
 dispatcher = updater.dispatcher
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+
+if logging_debug and logging_debug == "True":
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG)
+else:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +57,10 @@ def shutdown():
 
 
 def start(update: Update, context: CallbackContext):
+    user_firstname = update.message.from_user['first_name']
+    user_id = update.message.from_user['id']
+    username = update.message.from_user['username'] or 'empty'
+    logger.info(f'Session initiated by user: {user_firstname} ({username}, {user_id})')
     movie_handler = MessageHandler(Filters.text & (~Filters.command),
                                    input_movie)
     dispatcher.add_handler(movie_handler)
@@ -57,25 +69,25 @@ def start(update: Update, context: CallbackContext):
                              "movie and I'll tell you where to stream it.")
 
 
-def movie_lookup(movie):
+def movie_lookup(movie, user_firstname):
 
     if "-Year" in movie:
         year = movie.split("-Year")[1].strip()
         movie = movie.split("-Year")[0].strip()
-        logger.info(f'Looking up movie: "{movie}" ({year})')
+        logger.info(f'{user_firstname}: Looking up movie: "{movie}" ({year})')
         movie_id, movie_title, movie_year, movie_rating = (
         movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie, year))
     else:
-        logger.info(f'Looking up movie: "{movie}"')
+        logger.info(f'{user_firstname}: Looking up movie: "{movie}"')
         movie_id, movie_title, movie_year, movie_rating = (
             movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
 
     tmdb_page = "https://themoviedb.org/movie/"
 
     if movie_id == "404":
-        tg_reply = ("I'm having trouble finding that movie\. " +
+        tg_reply = (f"{user_firstname}: I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
-        logger.info('Movie not found in TMDB.')
+        logger.warning(f'{user_firstname}: Movie "{movie}" not found in TMDB.')
         similarity = 0
         error_response = False
         return tg_reply, similarity, error_response
@@ -83,19 +95,19 @@ def movie_lookup(movie):
     if movie_id == "401":
         tg_reply = ("Invalid TMDB API token\. " +
                     "Bot shutting down until restarted\.\.\.")
-        logger.info('Invalid TMDB API token. Exiting...')
+        logger.error('Invalid TMDB API token. Exiting...')
         similarity = 0
         error_response = True
         return tg_reply, similarity, error_response
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id, country)
     if sa_response == "404":
-        logger.info('Movie not found by the Streaming Availability API.')
+        logger.warning(f'{user_firstname}: Movie "{movie}" not found by the Streaming Availability API.')
     
     if sa_response == "401":
         tg_reply = ("Invalid Streaming Availability API token\. " +
                     "Bot shutting down until restarted\.\.\.")
-        logger.info('Invalid Streaming Availability API token. Exiting...')
+        logger.error(f'{user_firstname}: Invalid Streaming Availability API token. Exiting...')
         similarity = 0
         error_response = True
         return tg_reply, similarity, error_response
@@ -103,7 +115,7 @@ def movie_lookup(movie):
     similarity = difflib.SequenceMatcher(None, movie, movie_title).ratio()
     sim_percent = "{0:.0f}%".format(similarity * 100)
 
-    logger.info(f'Result was a {sim_percent} match.')
+    logger.info(f'{user_firstname}: Result was a {sim_percent} match.')
 
     movie_title = movie_check.char_cleanup(movie_title)
     movie_year = movie_check.char_cleanup(movie_year)
@@ -111,10 +123,11 @@ def movie_lookup(movie):
 
     tg_reply = (f"{movie_title} \({movie_year}\)\nRating: {movie_rating}" +
                 f"\n[TMDB]({tmdb_page}{movie_id})")
-    logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
+    logger.info(f'{user_firstname}: Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services or sa_response == "404":
         tg_reply = tg_reply + "\n\nStreaming not available :\("
+        logger.info(f'{user_firstname}: No streaming available for "{movie_title}: ({movie_year})"')
     else:
         for s in services:
             leaving_epoch = sa_response["streamingInfo"][s]["us"]["leaving"]
@@ -135,14 +148,15 @@ def movie_lookup(movie):
 
 
 def input_movie(update: Update, context: CallbackContext):
+    user_firstname = update.message.from_user['first_name']
     movie = update.message.text.title()
-    movie_info, similarity, error_response = movie_lookup(movie)
+    movie_info, similarity, error_response = movie_lookup(movie, user_firstname)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
     if error_response:
         shutdown()
     if similarity < .80 and similarity != 0:
-        logger.info("Result accuracy was below the threshold. Sending follow-up message.")
+        logger.info(f"{user_firstname}: Result accuracy was below the threshold. Sending follow-up message.")
         followup_msg = ("Not the movie you're looking for? " + 
                         "Try adding '\-year' followed by the release year after the title\.")
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -157,15 +171,15 @@ def unknown(update: Update, context: CallbackContext):
 def main():
 
     if not tmdb_api_token:
-        print("ERROR: TMDB API token not provided. Exiting...")
+        logger.error("ERROR: TMDB API token not provided. Exiting...")
         exit()
     
     if not sa_api_token:
-        print("ERROR: Streaming Availability API token not provided. Exiting...")
+        logger.error("ERROR: Streaming Availability API token not provided. Exiting...")
         exit()
     
     if not bot_token:
-        print("ERROR: Telegram bot token not provided. Exiting...")
+        logger.error("ERROR: Telegram bot token not provided. Exiting...")
         exit()
 
 
