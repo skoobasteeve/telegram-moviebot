@@ -52,11 +52,10 @@ def start(update: Update, context: CallbackContext):
     user_firstname = update.message.from_user['first_name']
     user_id = update.message.from_user['id']
     username = update.message.from_user['username'] or 'empty'
-    logger.info(f'{user_firstname}: Session initiated by user: {user_firstname} ({username}, {user_id})')
+    logger.info(f'Session initiated by user: {user_firstname} ({username}, {user_id})')
     movie_handler = MessageHandler(Filters.text & (~Filters.command),
                                    input_movie)
     dispatcher.add_handler(movie_handler)
-    logger.info(f'Session initiated by user: {user_firstname} ({username})')
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="I'm a movie streaming bot! Type in a " +
                              "movie and I'll tell you where to stream it.")
@@ -80,7 +79,7 @@ def movie_lookup(movie, user_firstname):
     if movie_id == "404":
         tg_reply = (f"{user_firstname}: I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
-        logger.info(f'{user_firstname}: Movie not found in TMDB.')
+        logger.warning(f'{user_firstname}: Movie "{movie}" not found in TMDB.')
         similarity = 0
         error_response = False
         return tg_reply, similarity, error_response
@@ -88,19 +87,19 @@ def movie_lookup(movie, user_firstname):
     if movie_id == "401":
         tg_reply = ("Invalid TMDB API token\. " +
                     "Bot shutting down until restarted\.\.\.")
-        logger.info('Invalid TMDB API token. Exiting...')
+        logger.error('Invalid TMDB API token. Exiting...')
         similarity = 0
         error_response = True
         return tg_reply, similarity, error_response
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id, country)
     if sa_response == "404":
-        logger.info(f'{user_firstname}: Movie not found by the Streaming Availability API.')
+        logger.warning(f'{user_firstname}: Movie "{movie}" not found by the Streaming Availability API.')
     
     if sa_response == "401":
         tg_reply = ("Invalid Streaming Availability API token\. " +
                     "Bot shutting down until restarted\.\.\.")
-        logger.info(f'{user_firstname}: Invalid Streaming Availability API token. Exiting...')
+        logger.error(f'{user_firstname}: Invalid Streaming Availability API token. Exiting...')
         similarity = 0
         error_response = True
         return tg_reply, similarity, error_response
@@ -141,8 +140,6 @@ def movie_lookup(movie, user_firstname):
 
 def input_movie(update: Update, context: CallbackContext):
     user_firstname = update.message.from_user['first_name']
-    username = update.message.from_user['username'] or 'empty'
-    logger.info(f'Session initiated by user: {user_firstname} ({username})')
     movie = update.message.text.title()
     movie_info, similarity, error_response = movie_lookup(movie, user_firstname)
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -165,15 +162,15 @@ def unknown(update: Update, context: CallbackContext):
 def main():
 
     if not tmdb_api_token:
-        print("ERROR: TMDB API token not provided. Exiting...")
+        logger.error("ERROR: TMDB API token not provided. Exiting...")
         exit()
     
     if not sa_api_token:
-        print("ERROR: Streaming Availability API token not provided. Exiting...")
+        logger.error("ERROR: Streaming Availability API token not provided. Exiting...")
         exit()
     
     if not bot_token:
-        print("ERROR: Telegram bot token not provided. Exiting...")
+        logger.error("ERROR: Telegram bot token not provided. Exiting...")
         exit()
 
 
