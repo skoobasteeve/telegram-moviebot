@@ -8,6 +8,7 @@ services:
       - TMDB_API_TOKEN=
       - SA_API_TOKEN=
       - TG_BOT_TOKEN=
-      - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
-      - STREAMING_COUNTRY= # (optional) Default "us"
+      - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user.
+      - STREAMING_COUNTRY= # (optional) Search country for streaming services. Default "us".
+      - TG_DEBUG= # (optional, True/False) Verbose debug logging. Default False.
   restart: always

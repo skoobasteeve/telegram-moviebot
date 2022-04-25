@@ -39,7 +39,7 @@ updater = Updater(token=bot_token, use_context=True)
 dispatcher = updater.dispatcher
 
 
-if logging_debug:
+if logging_debug and logging_debug == "True":
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG)
