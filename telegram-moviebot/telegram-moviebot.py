@@ -49,33 +49,38 @@ def shutdown():
 
 
 def start(update: Update, context: CallbackContext):
+    user_firstname = update.message.from_user['first_name']
+    user_id = update.message.from_user['id']
+    username = update.message.from_user['username'] or 'empty'
+    logger.info(f'{user_firstname}: Session initiated by user: {user_firstname} ({username}, {user_id})')
     movie_handler = MessageHandler(Filters.text & (~Filters.command),
                                    input_movie)
     dispatcher.add_handler(movie_handler)
+    logger.info(f'Session initiated by user: {user_firstname} ({username})')
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="I'm a movie streaming bot! Type in a " +
                              "movie and I'll tell you where to stream it.")
 
 
-def movie_lookup(movie):
+def movie_lookup(movie, user_firstname):
 
     if "-Year" in movie:
         year = movie.split("-Year")[1].strip()
         movie = movie.split("-Year")[0].strip()
-        logger.info(f'Looking up movie: "{movie}" ({year})')
+        logger.info(f'{user_firstname}: Looking up movie: "{movie}" ({year})')
         movie_id, movie_title, movie_year, movie_rating = (
         movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie, year))
     else:
-        logger.info(f'Looking up movie: "{movie}"')
+        logger.info(f'{user_firstname}: Looking up movie: "{movie}"')
         movie_id, movie_title, movie_year, movie_rating = (
             movie_check.tmdb_lookup(tmdb_url, tmdb_headers, movie))
 
     tmdb_page = "https://themoviedb.org/movie/"
 
     if movie_id == "404":
-        tg_reply = ("I'm having trouble finding that movie\. " +
+        tg_reply = (f"{user_firstname}: I'm having trouble finding that movie\. " +
                     "Check your spelling and try again\.")
-        logger.info('Movie not found in TMDB.')
+        logger.info(f'{user_firstname}: Movie not found in TMDB.')
         similarity = 0
         error_response = False
         return tg_reply, similarity, error_response
@@ -90,12 +95,12 @@ def movie_lookup(movie):
 
     sa_response, services = movie_check.sa_lookup(sa_url, sa_headers, movie_id, country)
     if sa_response == "404":
-        logger.info('Movie not found by the Streaming Availability API.')
+        logger.info(f'{user_firstname}: Movie not found by the Streaming Availability API.')
     
     if sa_response == "401":
         tg_reply = ("Invalid Streaming Availability API token\. " +
                     "Bot shutting down until restarted\.\.\.")
-        logger.info('Invalid Streaming Availability API token. Exiting...')
+        logger.info(f'{user_firstname}: Invalid Streaming Availability API token. Exiting...')
         similarity = 0
         error_response = True
         return tg_reply, similarity, error_response
@@ -103,7 +108,7 @@ def movie_lookup(movie):
     similarity = difflib.SequenceMatcher(None, movie, movie_title).ratio()
     sim_percent = "{0:.0f}%".format(similarity * 100)
 
-    logger.info(f'Result was a {sim_percent} match.')
+    logger.info(f'{user_firstname}: Result was a {sim_percent} match.')
 
     movie_title = movie_check.char_cleanup(movie_title)
     movie_year = movie_check.char_cleanup(movie_year)
@@ -111,7 +116,7 @@ def movie_lookup(movie):
 
     tg_reply = (f"{movie_title} \({movie_year}\)\nRating: {movie_rating}" +
                 f"\n[TMDB]({tmdb_page}{movie_id})")
-    logger.info(f'Returning movie: "{movie_title}: ({movie_year})"')
+    logger.info(f'{user_firstname}: Returning movie: "{movie_title}: ({movie_year})"')
 
     if not services or sa_response == "404":
         tg_reply = tg_reply + "\n\nStreaming not available :\("
@@ -135,14 +140,17 @@ def movie_lookup(movie):
 
 
 def input_movie(update: Update, context: CallbackContext):
+    user_firstname = update.message.from_user['first_name']
+    username = update.message.from_user['username'] or 'empty'
+    logger.info(f'Session initiated by user: {user_firstname} ({username})')
     movie = update.message.text.title()
-    movie_info, similarity, error_response = movie_lookup(movie)
+    movie_info, similarity, error_response = movie_lookup(movie, user_firstname)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=movie_info, parse_mode=ParseMode.MARKDOWN_V2)
     if error_response:
         shutdown()
     if similarity < .80 and similarity != 0:
-        logger.info("Result accuracy was below the threshold. Sending follow-up message.")
+        logger.info(f"{user_firstname}: Result accuracy was below the threshold. Sending follow-up message.")
         followup_msg = ("Not the movie you're looking for? " + 
                         "Try adding '\-year' followed by the release year after the title\.")
         context.bot.send_message(chat_id=update.effective_chat.id,
