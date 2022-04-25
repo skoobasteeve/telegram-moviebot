@@ -19,7 +19,9 @@ Regardless of how you run it, the program expects the above API tokens to be ava
 - **TG_BOT_TOKEN**
 
 Optional environment variables:
+- **TG_BOT_USER** (default empty) - Limit bot interaction to a single user.
 - **STREAMING_COUNTRY** (default "us") - Choose any ISO 3166 country code supported by the [Sreaming Availability API](https://rapidapi.com/movie-of-the-night-movie-of-the-night-default/api/streaming-availability/)
+- **TG_DEBUG** (default False) - Enable debug logging. WARNING: Will slow down your bot, use only for testing.
 
 ### Docker
 One-liner:  
@@ -44,6 +46,7 @@ services:
       - TG_BOT_TOKEN=${TG_BOT_TOKEN} # Required
       - STREAMING_COUNTRY= # (optional) Default "us"
       - TG_BOT_USER= # (optional) Limits access to the bot to a single Telegram user
+      - TG_DEBUG= # (optional, True/False) Verbose debug logging. Default False.
   restart: always
 ```
 ``` sh
