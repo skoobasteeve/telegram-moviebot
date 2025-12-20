@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3.14-alpine
 
 LABEL com.telegram-moviebot.version="main"
 
